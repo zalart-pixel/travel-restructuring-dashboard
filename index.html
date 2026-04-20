@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trevolution Group — Travel Corporate Restructuring Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F9F9F9; color: #252429; display: flex; min-height: 100vh; line-height: 1.5; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px; min-width: 260px; background: #252429; color: #fff;
+  display: flex; flex-direction: column; position: fixed;
+  top: 0; left: 0; bottom: 0; z-index: 100; overflow-y: auto;
+}
+.sidebar-logo { padding: 28px 24px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-logo .brand { font-size: 22px; font-weight: 800; letter-spacing: 3px; color: #fff; }
+.sidebar-logo .descriptor { font-size: 9px; font-weight: 500; letter-spacing: 2px; color: rgba(255,255,255,0.45); text-transform: uppercase; margin-top: 2px; }
+.sidebar-logo .project-label { font-size: 10px; font-weight: 600; color: #E22A26; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 16px; padding-bottom: 16px; }
+.sidebar-nav { flex: 1; padding: 16px 0; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+  color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; font-weight: 500;
+  transition: all 0.2s; border-left: 3px solid transparent; cursor: pointer;
+}
+.sidebar-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.sidebar-nav a.active { color: #fff; background: rgba(226,42,38,0.12); border-left-color: #E22A26; font-weight: 600; }
+.sidebar-nav a .nav-icon { width: 20px; text-align: center; font-size: 14px; flex-shrink: 0; }
+.sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.sidebar-footer .meta { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; }
+.sidebar-footer .conf { font-size: 9px; font-weight: 600; color: #E22A26; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* ===== MAIN ===== */
+.main { margin-left: 260px; flex: 1; min-height: 100vh; }
+.page-header { background: #fff; padding: 20px 36px; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between; }
+.page-header h1 { font-size: 20px; font-weight: 700; color: #252429; }
+.page-header .header-right { display: flex; align-items: center; gap: 16px; }
+.page-header .phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; background: rgba(226,42,38,0.12); color: #E22A26; letter-spacing: 0.5px; }
+.page-header .date-label { font-size: 10px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.page-content { padding: 28px 36px; }
+
+/* ===== TAB PAGES ===== */
+.tab-page { display: none; opacity: 0; transition: opacity 0.2s ease; }
+.tab-page.active { display: block; opacity: 1; }
+
+/* ===== CARDS ===== */
+.card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.section-title { font-size: 14px; font-weight: 700; color: #252429; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #E22A26; }
+
+/* ===== GRIDS ===== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+
+/* ===== KPI TILES ===== */
+.kpi-tile { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; }
+.kpi-value { font-size: 28px; font-weight: 800; color: #252429; line-height: 1.2; }
+.kpi-value.rag-amber { color: #f59e0b; }
+.kpi-value.rag-red { color: #E22A26; }
+.kpi-value.rag-green { color: #22c55e; }
+.kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #888; margin-top: 6px; letter-spacing: 0.5px; }
+
+/* ===== TABLES ===== */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th {
+  background: #252429; color: #fff; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; padding: 10px 12px; text-align: left; letter-spacing: 0.5px;
+}
+.tbl tbody td { font-size: 12px; font-weight: 400; color: #252429; padding: 10px 12px; border-bottom: 1px solid #eee; }
+.tbl tbody tr:nth-child(even) { background: #F9F9F9; }
+.tbl tbody tr:hover { background: #f0f0f0; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;
+}
+.badge-green { background: rgba(34,197,94,0.12); color: #22c55e; }
+.badge-amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.badge-red { background: rgba(226,42,38,0.12); color: #E22A26; }
+.badge-blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.badge-gray { background: rgba(136,136,136,0.12); color: #888; }
+
+/* ===== RAG DOTS ===== */
+.rag-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.rag-dot.green { background: #22c55e; }
+.rag-dot.amber { background: #f59e0b; }
+.rag-dot.red { background: #E22A26; }
+
+/* ===== BODY TEXT ===== */
+.body-text { font-size: 13px; font-weight: 400; color: #252429; }
+.label-text { font-size: 10px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ===== PHASE TIMELINE BARS ===== */
+.timeline-bar-wrap { margin-bottom: 12px; }
+.timeline-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+.timeline-bar { height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 12px; font-size: 12px; font-weight: 400; color: #fff; position: relative; }
+.timeline-bar.current { background: #E22A26; }
+.timeline-bar.future { background: #ccc; color: #252429; }
+.timeline-gate { font-size: 10px; font-weight: 700; color: #E22A26; text-transform: uppercase; text-align: right; margin-top: 2px; }
+
+/* ===== CRITICAL PATH FLOW ===== */
+.cp-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; padding: 16px 0; }
+.cp-step { padding: 12px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #fff; position: relative; text-align: center; min-width: 110px; }
+.cp-step .cp-owner { font-size: 10px; font-weight: 600; text-transform: uppercase; margin-top: 4px; opacity: 0.85; }
+.cp-step.done { background: #22c55e; }
+.cp-step.current { background: #E22A26; }
+.cp-step.upcoming { background: #ccc; color: #252429; }
+.cp-step.gate { background: #252429; }
+.cp-arrow { font-size: 18px; font-weight: 700; color: #888; padding: 0 6px; flex-shrink: 0; }
+
+/* ===== FINDING CARDS ===== */
+.finding-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 3px solid #E22A26; }
+.finding-card.resolved { border-left-color: #22c55e; }
+.finding-card .finding-title { font-size: 13px; font-weight: 700; color: #252429; margin-bottom: 6px; }
+.finding-card .finding-desc { font-size: 12px; font-weight: 400; color: #555; margin-bottom: 8px; line-height: 1.5; }
+
+/* ===== PHASE GATE CHECKLIST ===== */
+.gate-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.gate-check:last-child { border-bottom: none; }
+.gate-icon { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; flex-shrink: 0; margin-top: 1px; }
+.gate-icon.done { background: #22c55e; }
+.gate-icon.ip { background: #f59e0b; }
+.gate-icon.ns { background: #ccc; }
+.gate-icon.confirmed { background: #22c55e; }
+.gate-icon.pending { background: #3b82f6; }
+.gate-text { font-size: 12px; font-weight: 400; color: #252429; flex: 1; }
+.gate-status { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #888; flex-shrink: 0; }
+
+/* ===== WORKSTREAM CARDS V2 ===== */
+.ws-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+.ws-card .ws-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.ws-card .ws-name { font-size: 13px; font-weight: 700; color: #252429; }
+.ws-card .ws-owner { font-size: 10px; font-weight: 500; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+.ws-card .ws-desc { font-size: 12px; font-weight: 400; color: #555; margin-bottom: 10px; line-height: 1.5; }
+.ws-card .ws-meta { font-size: 10px; font-weight: 500; color: #888; margin-bottom: 4px; }
+.ws-card .ws-meta span { color: #252429; font-weight: 600; }
+.ws-card .ws-progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.ws-card .ws-progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+.ws-card .ws-progress-fill.green { background: #22c55e; }
+.ws-card .ws-progress-fill.amber { background: #f59e0b; }
+.ws-card .ws-progress-fill.red { background: #E22A26; }
+
+/* ===== MILESTONE TIMELINE ===== */
+.milestone-timeline { display: flex; align-items: flex-start; overflow-x: auto; padding: 20px 0; position: relative; }
+.milestone-track { display: flex; align-items: flex-start; position: relative; }
+.milestone-node { display: flex; flex-direction: column; align-items: center; position: relative; min-width: 100px; }
+.milestone-dot { width: 18px; height: 18px; border-radius: 50%; z-index: 2; flex-shrink: 0; }
+.milestone-dot.done { background: #22c55e; }
+.milestone-dot.ip { background: #E22A26; animation: pulse 1.5s infinite; }
+.milestone-dot.upcoming { background: #ccc; }
+.milestone-dot.gate { width: 18px; height: 18px; background: #252429; transform: rotate(45deg); border-radius: 3px; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(226,42,38,0.4); } 50% { box-shadow: 0 0 0 8px rgba(226,42,38,0); } }
+.milestone-line { position: absolute; top: 9px; left: 50%; width: 100%; height: 2px; background: #ddd; z-index: 1; }
+.milestone-node:last-child .milestone-line { display: none; }
+.milestone-info { margin-top: 10px; text-align: center; }
+.milestone-date { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; }
+.milestone-name { font-size: 10px; font-weight: 500; color: #252429; max-width: 90px; line-height: 1.3; margin-top: 2px; }
+
+/* ===== ENTITY ORG CHART ===== */
+.org-chart { display: flex; flex-direction: column; align-items: center; padding: 16px 0; }
+.org-node { border: 2px solid #ccc; border-radius: 8px; padding: 10px 16px; text-align: center; background: #fff; position: relative; min-width: 140px; }
+.org-node .org-name { font-size: 12px; font-weight: 700; color: #252429; }
+.org-node .org-jurisdiction { font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; background: #F0EBE1; color: #888; display: inline-block; margin-top: 3px; }
+.org-node .org-role { font-size: 10px; font-weight: 500; color: #555; margin-top: 3px; }
+.org-node .org-status { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+.org-node.migrate { border-color: #E22A26; }
+.org-node.keep { border-color: #888; }
+.org-node.new-entity { border-color: #22c55e; }
+.org-node.question { border-color: #f59e0b; }
+.org-node.liquidate { border-color: #E22A26; opacity: 0.5; }
+.org-node.liquidate .org-name { text-decoration: line-through; }
+.org-connector { width: 2px; height: 20px; background: #ccc; }
+.org-h-line { height: 2px; background: #ccc; }
+.org-row { display: flex; gap: 16px; align-items: flex-start; justify-content: center; position: relative; }
+.org-branch { display: flex; flex-direction: column; align-items: center; }
+
+/* ===== DECISION TREE ===== */
+.dtree-node { border: 1px solid #e5e5e5; border-radius: 6px; padding: 12px 16px; margin: 8px 0; cursor: pointer; font-size: 12px; font-weight: 400; color: #252429; }
+.dtree-node.decision { background: rgba(59,130,246,0.06); border-left: 3px solid #3b82f6; }
+.dtree-node.option { background: rgba(34,197,94,0.06); border-left: 3px solid #22c55e; }
+.dtree-node.blocked { background: rgba(226,42,38,0.06); border-left: 3px solid #E22A26; }
+.dtree-node.deferred { background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; }
+.dtree-children { margin-left: 24px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.dtree-children.open { max-height: 600px; }
+.dtree-toggle { font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; cursor: pointer; margin-left: 8px; display: inline-block; transition: transform 0.2s; }
+.dtree-toggle.rotated { transform: rotate(90deg); }
+
+/* ===== HEAT MAP ===== */
+.heatmap { display: grid; grid-template-columns: 40px repeat(5,1fr); grid-template-rows: auto repeat(5,48px); gap: 2px; }
+.heatmap-label { font-size: 10px; font-weight: 600; color: #888; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
+.heatmap-cell { border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; cursor: default; position: relative; }
+.heatmap-cell.low { background: #22c55e; }
+.heatmap-cell.med { background: #f59e0b; }
+.heatmap-cell.high { background: #E22A26; }
+.heatmap-cell.extreme { background: #991b1b; }
+.heatmap-cell .hm-tooltip { display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #252429; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 10px; font-weight: 400; white-space: nowrap; z-index: 50; text-transform: none; }
+.heatmap-cell:hover .hm-tooltip { display: block; }
+
+/* ===== BLOCKER CHAINS ===== */
+.chain { display: flex; align-items: center; gap: 0; margin-bottom: 16px; flex-wrap: wrap; }
+.chain-node { padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 500; color: #fff; }
+.chain-node.red-node { background: #E22A26; }
+.chain-node.amber-node { background: #f59e0b; }
+.chain-node.blue-node { background: #3b82f6; }
+.chain-arrow { font-size: 14px; font-weight: 700; color: #888; padding: 0 6px; }
+
+/* ===== STAKEHOLDER 2x2 ===== */
+.stakeholder-grid { display: grid; grid-template-columns: 40px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 2px; }
+.sq-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; display: flex; align-items: center; justify-content: center; }
+.sq-label.rotated { writing-mode: vertical-rl; transform: rotate(180deg); }
+.sq-cell { background: #F0EBE1; border-radius: 6px; padding: 16px; min-height: 100px; }
+.sq-cell .sq-person { font-size: 12px; font-weight: 400; color: #252429; margin-bottom: 4px; }
+
+/* ===== COMPARISON TABLE CELLS ===== */
+.cell-adv { background: rgba(34,197,94,0.08); }
+.cell-disadv { background: rgba(226,42,38,0.08); }
+.cell-neutral { background: rgba(245,158,11,0.08); }
+
+/* ===== ADVISOR PIPELINE ===== */
+.pipeline-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #eee; min-width: 120px; }
+.pipeline-fill { height: 100%; }
+.pipeline-fill.stage1 { background: #ccc; }
+.pipeline-fill.stage2 { background: #f59e0b; }
+.pipeline-fill.stage3 { background: #3b82f6; }
+.pipeline-fill.stage4 { background: #22c55e; }
+
+/* ===== COLLAPSIBLE ===== */
+.collapsible-header { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.collapsible-header .toggle-icon { font-size: 12px; color: #888; transition: transform 0.2s; }
+.collapsible-header .toggle-icon.rotated { transform: rotate(90deg); }
+.collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.collapsible-body.open { max-height: 2000px; }
+
+/* ===== FILTER BAR ===== */
+.filter-bar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; border: 1px solid #e5e5e5; background: #fff; color: #252429; cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover { border-color: #E22A26; color: #E22A26; }
+.filter-btn.active { background: #E22A26; color: #fff; border-color: #E22A26; }
+
+/* ===== PRINT ===== */
+@media print {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .page-content { padding: 12px; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #eee; }
+  .tab-page { display: block !important; opacity: 1 !important; page-break-before: always; }
+  .tab-page:first-child { page-break-before: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- SIDEBAR -->
+<!-- ================================================================ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">TREVOLUTION</div>
+    <div class="descriptor">TRAVEL DIVISION, DYNINNO GROUP</div>
+    <div class="project-label">Travel Corporate Restructuring</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="active" onclick="switchTab('exec')">
+      <span class="nav-icon">&#9670;</span> Executive Summary
+    </a>
+    <a onclick="switchTab('status')">
+      <span class="nav-icon">&#9632;</span> Program Status
+    </a>
+    <a onclick="switchTab('structure')">
+      <span class="nav-icon">&#9650;</span> Structure &amp; Decisions
+    </a>
+    <a onclick="switchTab('tax')">
+      <span class="nav-icon">&#9679;</span> Tax &amp; Jurisdictions
+    </a>
+    <a onclick="switchTab('risk')">
+      <span class="nav-icon">&#9888;</span> Risk &amp; Dependencies
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="meta">Updated: 20 April 2026</div>
+    <div class="conf">Strictly Confidential</div>
+  </div>
+</nav>
+
+<!-- ================================================================ -->
+<!-- MAIN CONTENT -->
+<!-- ================================================================ -->
+<div class="main">
+  <div class="page-header">
+    <h1>Travel Corporate Restructuring Programme</h1>
+    <div class="header-right">
+      <span class="phase-badge">Post Go-Live — UAE Consolidation</span>
+      <div class="date-label">As of 20 April 2026</div>
+    </div>
+  </div>
+  <div class="page-content">
+
+<!-- ================================================================ -->
+<!-- TAB 1: EXECUTIVE SUMMARY -->
+<!-- ================================================================ -->
+<div id="tab-exec" class="tab-page active">
+
+  <!-- KPI ROW -->
+  <div class="grid-6" style="margin-bottom:20px;">
+    <div class="kpi-tile">
+      <div class="kpi-value">Post GL</div>
+      <div class="kpi-label">Phase</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-value">110</div>
+      <div class="kpi-label">Days since Go-Live</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-value rag-red">3</div>
+      <div class="kpi-label">Blockers</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-value">6</div>
+      <div class="kpi-label">Decisions Made</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-value">13</div>
+      <div class="kpi-label">Open Actions</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-value rag-amber">AMBER</div>
+      <div class="kpi-label">Overall RAG</div>
+    </div>
+  </div>
+
+  <!-- PHASE TIMELINE -->
+  <div class="card">
+    <div class="section-title">Phase Timeline</div>
+    <div class="timeline-bar-wrap">
+      <div class="timeline-label">Go-Live (1 Jan 2026) &mdash; Confirmed Achieved</div>
+      <div class="timeline-bar current" style="width:100%;">Go-Live milestone landed 1 Jan 2026</div>
+      <div class="timeline-gate">Travel NewCo Incorporated 3 Oct 2025</div>
+    </div>
+    <div class="timeline-bar-wrap">
+      <div class="timeline-label">UAE Consolidation &mdash; Agreement Transfer to UAE (Active)</div>
+      <div class="timeline-bar current" style="width:100%;">Q3 2025 &ndash; Apr 2026</div>
+      <div class="timeline-gate">Luxaviation pack received, airplane agreement resuming</div>
+    </div>
+    <div class="timeline-bar-wrap">
+      <div class="timeline-label">Travel NewCo Operational Readiness</div>
+      <div class="timeline-bar future">Q2 2026 &ndash; 1 Nov 2026</div>
+      <div class="timeline-gate">IATA licence, banking, hiring ramp</div>
+    </div>
+  </div>
+
+  <!-- CRITICAL PATH FLOW -->
+  <div class="card">
+    <div class="section-title">Critical Path</div>
+    <div class="cp-flow">
+      <div class="cp-step done">Travel NewCo<br>Incorporated<div class="cp-owner">Abbas El Seblani</div></div>
+      <div class="cp-arrow">&#8594;</div>
+      <div class="cp-step done">Go-Live<br>1 Jan 2026<div class="cp-owner">All</div></div>
+      <div class="cp-arrow">&#8594;</div>
+      <div class="cp-step current">Airplane<br>Agreement Transfer<div class="cp-owner">Darya Balta / Helen</div></div>
+      <div class="cp-arrow">&#8594;</div>
+      <div class="cp-step current">UAE Entity<br>Consolidation<div class="cp-owner">Darya Balta / Inna</div></div>
+      <div class="cp-arrow">&#8594;</div>
+      <div class="cp-step upcoming">IATA Licence<br>Travel NewCo<div class="cp-owner">Abbas El Seblani</div></div>
+      <div class="cp-arrow">&#8594;</div>
+      <div class="cp-step gate">Operational<br>Ready 1 Nov 2026<div class="cp-owner">PgM</div></div>
+    </div>
+  </div>
+
+  <!-- TOP 5 IMMEDIATE ACTIONS -->
+  <div class="card">
+    <div class="section-title">Top 5 Immediate Actions</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Action</th><th>Owner</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Confirm destination entity name for Airplane agreement transfer (unblock Helen's transfer execution)</td><td>Darya Balta</td><td><span class="badge badge-red">URGENT</span></td><td>In Progress</td></tr>
+        <tr><td>2</td><td>Share San Marino Aircraft Operating Licence and aviation regulatory pack to SharePoint (AOL, AOC, operation specs, TCO)</td><td>Helen</td><td><span class="badge badge-red">HIGH</span></td><td>In Progress</td></tr>
+        <tr><td>3</td><td>Complete RU Office Rent Reallocation (Travel-dedicated scope only) for Q1 2026 close</td><td>Jekaterina Stuge</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr><td>4</td><td>Resolve marketing agreement transfer to DXB blocked on missing l.Shcele employee information</td><td>HR / Legal</td><td><span class="badge badge-red">HIGH</span></td><td>Blocked</td></tr>
+        <tr><td>5</td><td>Finalise Brazil Data Protection Standards feedback from BRA counsel (Caldas Associados)</td><td>Brazil counsel</td><td><span class="badge badge-amber">MEDIUM</span></td><td>To Do</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6 CRITICAL FINDINGS -->
+  <div class="card">
+    <div class="section-title">Critical Findings</div>
+    <div class="grid-3" style="margin-top:4px;">
+      <div class="finding-card">
+        <div class="finding-title">F1: Airplane Agreement Destination Unnamed</div>
+        <div class="finding-desc">Helen is ready to initiate the Airplane agreement transfer but does not yet have the name of the receiving entity. Counterparty Luxaviation (San Marino) has paused invoicing until restructuring completes in April 2026.</div>
+        <span class="badge badge-red">URGENT</span>
+        <div class="label-text" style="margin-top:8px;">Action: destination entity confirmed on UAE call</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">F2: IATA Licence Timing for Travel NewCo</div>
+        <div class="finding-desc">Travel NewCo (GM Abbas El Seblani, incorporated 3 Oct 2025) needs IATA licence, banking, and hiring capability live from November 2026 to meet operational-readiness milestone.</div>
+        <span class="badge badge-red">HIGH</span>
+        <div class="label-text" style="margin-top:8px;">Action: weekly licensing-milestone tracking</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">F3: UAE Feasibility Guardrail Gaps</div>
+        <div class="finding-desc">Alex Weinstein's Fully Feasible / Partially Feasible / Not Feasible assessment for UAE restructuring steps has unresolved lines. Full table required before the next gate.</div>
+        <span class="badge badge-amber">HIGH</span>
+        <div class="label-text" style="margin-top:8px;">Action: close Partially/Not Feasible items</div>
+      </div>
+      <div class="finding-card resolved">
+        <div class="finding-title">F4: Travel NewCo Go-Live Confirmed</div>
+        <div class="finding-desc">The 1 January 2026 Go-Live milestone was formally confirmed. Travel NewCo incorporated 3 October 2025 with Abbas El Seblani appointed General Manager.</div>
+        <span class="badge badge-green">RESOLVED</span>
+        <div class="label-text" style="margin-top:8px;">Milestone achieved as planned</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">F5: Brazil Data Protection Standards</div>
+        <div class="finding-desc">Dyninno Brasil Ltda DPS not yet adapted to BRA law. Caldas Associados engaged to provide questionnaire feedback; completion required before Brazil hiring ramp.</div>
+        <span class="badge badge-amber">HIGH</span>
+        <div class="label-text" style="margin-top:8px;">Action: BRA counsel feedback</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">F6: Duplicate Loop Captures on NewCo Slides</div>
+        <div class="finding-desc">Sources 0716f91e, d7d55c4d, 4d7374d3, 674aa014 all carry the same Travel NewCo stakeholder requirements status table. Deprecate duplicates to avoid stale-branch confusion.</div>
+        <span class="badge badge-amber">MEDIUM</span>
+        <div class="label-text" style="margin-top:8px;">Action: confirm single canonical slide</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERATIONAL-READINESS CHECKLIST -->
+  <div class="card">
+    <div class="section-title">Operational Readiness Checklist (Target: 1 November 2026)</div>
+    <div class="gate-check">
+      <div class="gate-icon confirmed">&#10003;</div>
+      <div class="gate-text">Travel NewCo incorporated with General Manager appointed (Abbas El Seblani, 3 Oct 2025)</div>
+      <div class="gate-status" style="color:#22c55e;">Confirmed</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon confirmed">&#10003;</div>
+      <div class="gate-text">Go-Live milestone 1 Jan 2026 achieved</div>
+      <div class="gate-status" style="color:#22c55e;">Confirmed</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ip">&#9679;</div>
+      <div class="gate-text">Airplane agreement transfer to UAE (Luxaviation regulatory pack received 2 April 2026)</div>
+      <div class="gate-status" style="color:#f59e0b;">In Progress</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ip">&#9679;</div>
+      <div class="gate-text">UAE entity-to-entity employee transfers formally scoped</div>
+      <div class="gate-status" style="color:#f59e0b;">In Progress</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ns">&#9679;</div>
+      <div class="gate-text">IATA licence, banking, and hiring capability live for Travel NewCo</div>
+      <div class="gate-status" style="color:#888;">Not Started</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ns">&#9679;</div>
+      <div class="gate-text">Marketing agreement transfer to DXB (blocked on missing l.Shcele employee information)</div>
+      <div class="gate-status" style="color:#E22A26;">Blocked</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ns">&#9679;</div>
+      <div class="gate-text">Brazil Data Protection Standards adapted to local law (Caldas Associados)</div>
+      <div class="gate-status" style="color:#888;">Not Started</div>
+    </div>
+    <div class="gate-check">
+      <div class="gate-icon ns">&#9679;</div>
+      <div class="gate-text">Call-2-Book operator/seller split operational (ASAP and Skylux sites, UAE-based operator)</div>
+      <div class="gate-status" style="color:#f59e0b;">In Progress</div>
+    </div>
+  </div>
+
+  <!-- Source-of-truth note for Tabs 2+ -->
+  <div class="card" style="border-left: 3px solid #E22A26;">
+    <div class="section-title">Other Tabs</div>
+    <div style="color: #555; font-size: 13px; line-height: 1.6;">
+      <strong>Program Status</strong>, <strong>Structure &amp; Decisions</strong>, <strong>Tax &amp; Jurisdictions</strong>, and <strong>Risk &amp; Dependencies</strong> tabs are scaffolded from the Holding dashboard template and will be fully populated with Travel-specific content in a subsequent refresh. Authoritative Travel data today: this Executive Summary plus the MBS-generated <em>restructuring_travel_brief.md</em> (2026-04-20, 51 events across 6 decisions, 9 commitments, 8 risks).
+    </div>
+  </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- TAB 2: PROGRAM STATUS -->
+<!-- ================================================================ -->
+<div id="tab-status" class="tab-page">
+
+  <!-- PROGRAM ROADMAP GANTT -->
+  <div class="card">
+    <div class="section-title">Program Roadmap — Phase 1 Weekly Breakdown</div>
+    <div style="position:relative; height:340px;">
+      <canvas id="ganttCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- WORKSTREAM RAG GRID -->
+  <div class="card">
+    <div class="section-title">Workstream Status</div>
+    <div class="grid-3">
+      <!-- WS-1 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">1. Group Holding Migration</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Legal/Strategic Advisor</div>
+        <div class="ws-desc">Migrate DGL from Malta to UAE Dubai. Analyze entity type, tax rates, substance requirements, and dividend flow to US LLC. UAE is the default/expected outcome per kickoff decision.</div>
+        <div class="ws-meta">Deliverable: <span>UAE Group Holding Tax Analysis</span></div>
+        <div class="ws-meta">Dependencies: <span>WS-5 (Free Zone), KPMG TP confirmation</span></div>
+        <div class="ws-meta">Blocker: <span>None</span></div>
+        <div class="ws-meta">Target: <span>May 2, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:25%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">25% Complete</div>
+      </div>
+      <!-- WS-2 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">2. Travel Holding Jurisdiction</div><span class="rag-dot amber"></span></div>
+        <div class="ws-owner">Tax Director + Legal/Strategic Advisor</div>
+        <div class="ws-desc">Side-by-side comparison of UAE vs Netherlands for travel holding. Must include tax rates, dividend repatriation, treaty network, substance, IPO readiness, and costs. Most consequential decision in the program.</div>
+        <div class="ws-meta">Deliverable: <span>UAE vs NL Comparison Report</span></div>
+        <div class="ws-meta">Dependencies: <span>WS-5, WS-6, UBO IPO decision</span></div>
+        <div class="ws-meta">Blocker: <span>UBO IPO decision not obtained</span></div>
+        <div class="ws-meta">Target: <span>May 2, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill amber" style="width:10%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">10% Complete</div>
+      </div>
+      <!-- WS-3 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">3. Exit Tax &amp; Transfer Mechanics</div><span class="rag-dot amber"></span></div>
+        <div class="ws-owner">Tax Director</div>
+        <div class="ws-desc">Analyze all transfer mechanics (investment in kind, share sale, subsidiary sale, redomiciliation). Establish Malta exit tax framework with applicable provisions, FMV methodology, and range estimate. Cross-track: affects both Group and Travel holding.</div>
+        <div class="ws-meta">Deliverable: <span>Transfer Mechanics Paper + Exit Tax Framework</span></div>
+        <div class="ws-meta">Dependencies: <span>WS-1, WS-2, CFO valuation inputs</span></div>
+        <div class="ws-meta">Blocker: <span>Malta exit tax quantum unknown</span></div>
+        <div class="ws-meta">Target: <span>Apr 11, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill amber" style="width:10%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">10% Complete</div>
+      </div>
+      <!-- WS-4 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">4. Fintech Asset Segregation</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Legal/Strategic Advisor</div>
+        <div class="ws-desc">Trust structure eliminated for fintech (confirmed 4x across MoMs #01-#04). Risk separation achieved through corporate structure (separate holding branch), not beneficial ownership opacity. Formal rationale documentation pending.</div>
+        <div class="ws-meta">Deliverable: <span>Trust Infeasibility Memo</span></div>
+        <div class="ws-meta">Dependencies: <span>None</span></div>
+        <div class="ws-meta">Blocker: <span>None</span></div>
+        <div class="ws-meta">Target: <span>Mar 28, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:80%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">80% Complete</div>
+      </div>
+      <!-- WS-5 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">5. Free Zone Analysis</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Tax Director</div>
+        <div class="ws-desc">Compare DIFC vs Abu Dhabi free zone for holding company activities: corporate tax rates, substance requirements, permitted activities, regulatory framework. Finding F4 simplifies: DIFC is the presumptive choice.</div>
+        <div class="ws-meta">Deliverable: <span>Free Zone Comparison Memo</span></div>
+        <div class="ws-meta">Dependencies: <span>Holding activities scope confirmation</span></div>
+        <div class="ws-meta">Blocker: <span>None</span></div>
+        <div class="ws-meta">Target: <span>Mar 28, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:60%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">60% Complete</div>
+      </div>
+      <!-- WS-6 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">6. Dutch Participation Exemption</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Tax Director</div>
+        <div class="ws-desc">Preliminary assessment of whether group's travel subsidiaries qualify under Dutch participation exemption for tax-efficient dividend repatriation. Formal verification only if Netherlands is selected in Phase 2.</div>
+        <div class="ws-meta">Deliverable: <span>Preliminary Assessment Note</span></div>
+        <div class="ws-meta">Dependencies: <span>WS-2 jurisdiction decision</span></div>
+        <div class="ws-meta">Blocker: <span>None (contingent workstream)</span></div>
+        <div class="ws-meta">Target: <span>Mar 28, 2026 (prelim)</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:15%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">15% Complete</div>
+      </div>
+      <!-- WS-7 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">7. Corporate Governance &amp; Succession</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Legal/Strategic Advisor + CFO</div>
+        <div class="ws-desc">Governance framework for new holding: director appointments, board composition, decision rights, succession planning for UBO, risk distribution. Not on critical path for Phase 1 but must be designed before entity formation in Phase 3.</div>
+        <div class="ws-meta">Deliverable: <span>Governance Framework Document</span></div>
+        <div class="ws-meta">Dependencies: <span>WS-1, WS-2 jurisdiction decisions</span></div>
+        <div class="ws-meta">Blocker: <span>None (Phase 2 deliverable)</span></div>
+        <div class="ws-meta">Target: <span>Jun 13, 2026</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:5%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">5% Complete</div>
+      </div>
+      <!-- WS-8 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">8. Sequence Planning</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Program Manager</div>
+        <div class="ws-desc">Order of operations for holding migration, dependency chain, critical path for execution. The order matters enormously: if both go to UAE, done twice with similar mechanics. If travel goes to NL and group to UAE, different mechanics apply.</div>
+        <div class="ws-meta">Deliverable: <span>Sequence Plan</span></div>
+        <div class="ws-meta">Dependencies: <span>All WS-1 through WS-7</span></div>
+        <div class="ws-meta">Blocker: <span>None (dependent on other WS outputs)</span></div>
+        <div class="ws-meta">Target: <span>Apr 18, 2026 (initial)</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:10%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">10% Complete</div>
+      </div>
+      <!-- WS-9 -->
+      <div class="ws-card">
+        <div class="ws-header"><div class="ws-name">9. Stakeholder &amp; Advisor Coord.</div><span class="rag-dot green"></span></div>
+        <div class="ws-owner">Program Manager</div>
+        <div class="ws-desc">Ongoing advisor engagement management, meeting coordination, deliverable tracking, escalation management. KPMG engagement exists from operational restructuring. Local counsel needed in Malta, UAE, and potentially Netherlands.</div>
+        <div class="ws-meta">Deliverable: <span>Ongoing coordination</span></div>
+        <div class="ws-meta">Dependencies: <span>External advisor responsiveness</span></div>
+        <div class="ws-meta">Blocker: <span>CLO availability (~3 min in 2 weeks)</span></div>
+        <div class="ws-meta">Target: <span>Ongoing</span></div>
+        <div class="ws-progress-bar"><div class="ws-progress-fill green" style="width:30%;"></div></div>
+        <div class="label-text" style="margin-top:4px;">30% Complete</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION ITEMS TABLE -->
+  <div class="card">
+    <div class="section-title">Action Items</div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterActions('ALL')">All</button>
+      <button class="filter-btn" onclick="filterActions('URGENT')">Urgent</button>
+      <button class="filter-btn" onclick="filterActions('HIGH')">High</button>
+      <button class="filter-btn" onclick="filterActions('MEDIUM')">Medium</button>
+      <button class="filter-btn" onclick="filterActions('LOW')">Low</button>
+    </div>
+    <table class="tbl" id="action-table">
+      <thead><tr><th>Source</th><th>Action</th><th>Owner</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr data-priority="URGENT"><td>MoM#04</td><td>Prepare options summary (DIL 4 + DGL NL/UAE)</td><td>PM</td><td><span class="badge badge-red">URGENT</span></td><td>In Progress</td></tr>
+        <tr data-priority="URGENT"><td>ExecSum</td><td>Engage US tax counsel — CFC/GILTI (NOT SCOPED)</td><td>PM + Tax Dir</td><td><span class="badge badge-red">URGENT</span></td><td>Blocked</td></tr>
+        <tr data-priority="URGENT"><td>ExecSum</td><td>Malta counsel: confirm 6/7ths refund on exit tax</td><td>Tax Dir</td><td><span class="badge badge-red">URGENT</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Document trust rejection rationale</td><td>Legal</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Document transfer options — step-by-step legal mechanics</td><td>Legal</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Analyze DIL migration — tax consequences for 4 mechanisms</td><td>Tax Dir</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Analyze DGL jurisdiction — NL vs UAE (dividend flow, substance, exemptions)</td><td>Tax Dir</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Verify UAE holding viability</td><td>Tax Dir</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#04</td><td>Update Sponsor — flag Legal blocker</td><td>CFO</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>MoM#03</td><td>Legal define transfer options</td><td>Legal</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>ExecSum</td><td>CFO confirm consolidated revenue vs EUR 750M threshold</td><td>CFO</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>ExecSum</td><td>UAE counsel: confirm participation exemption and QFZP treatment</td><td>Tax Dir</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>ExecSum</td><td>Dutch counsel: confirm 9% vs 10% subject-to-tax test</td><td>Tax Dir</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="HIGH"><td>ExecSum</td><td>Schedule UBO session to discuss IPO readiness criterion</td><td>PM</td><td><span class="badge badge-red">HIGH</span></td><td>To Do</td></tr>
+        <tr data-priority="MEDIUM"><td>MoM#04</td><td>Schedule follow-up session with Tax Director</td><td>PM</td><td><span class="badge badge-amber">MEDIUM</span></td><td>To Do</td></tr>
+        <tr data-priority="MEDIUM"><td>MoM#04</td><td>Brief Legal team once summary ready</td><td>PM</td><td><span class="badge badge-amber">MEDIUM</span></td><td>To Do</td></tr>
+        <tr data-priority="MEDIUM"><td>MoM#04</td><td>Close dormant companies (VN, BR, TR, IT, RO)</td><td>CFO + PM</td><td><span class="badge badge-amber">MEDIUM</span></td><td>In Progress</td></tr>
+        <tr data-priority="MEDIUM"><td>ExecSum</td><td>Initiate FMV valuation scoping</td><td>Tax Dir + CFO</td><td><span class="badge badge-amber">MEDIUM</span></td><td>To Do</td></tr>
+        <tr data-priority="MEDIUM"><td>ExecSum</td><td>Distribute analysis frameworks to CLO for review</td><td>PM</td><td><span class="badge badge-amber">MEDIUM</span></td><td>To Do</td></tr>
+        <tr data-priority="LOW"><td>MoM#04</td><td>Post MoMs + project info to Teams channel</td><td>PM</td><td><span class="badge badge-gray">LOW</span></td><td>To Do</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VISUAL MILESTONE TIMELINE -->
+  <div class="card">
+    <div class="section-title">Milestone Timeline</div>
+    <div class="milestone-timeline">
+      <div class="milestone-track">
+        <div class="milestone-node">
+          <div class="milestone-dot done"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Mar 11</div><div class="milestone-name">Kickoff</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot done"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Mar 14</div><div class="milestone-name">Roadmap Issued</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot ip"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Mar 21</div><div class="milestone-name">Tax Scope Confirmed</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot ip"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Mar 28</div><div class="milestone-name">Free Zone + Trust Memo</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot upcoming"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Apr 4</div><div class="milestone-name">Transfer Mechanics</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot upcoming"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Apr 11</div><div class="milestone-name">Exit Tax Framework</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot upcoming"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Apr 18</div><div class="milestone-name">Phase 1 Draft</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot upcoming"></div>
+          <div class="milestone-line"></div>
+          <div class="milestone-info"><div class="milestone-date">Apr 25</div><div class="milestone-name">Review Cycle</div></div>
+        </div>
+        <div class="milestone-node">
+          <div class="milestone-dot gate"></div>
+          <div class="milestone-info"><div class="milestone-date">May 2</div><div class="milestone-name" style="font-weight:700;color:#E22A26;">PHASE GATE 1</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RACI MATRIX (COLLAPSIBLE) -->
+  <div class="card">
+    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+      <span class="toggle-icon">&#9654;</span>
+      <div class="section-title" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">RACI Matrix — Phase 1</div>
+    </div>
+    <div class="collapsible-body">
+      <table class="tbl" style="margin-top:12px;">
+        <thead><tr><th>Activity</th><th>PM</th><th>UBO</th><th>CLO</th><th>Tax Dir</th><th>CFO</th><th>KPMG</th></tr></thead>
+        <tbody>
+          <tr><td>Phase 1 coordination</td><td>R</td><td>I</td><td>C</td><td>A</td><td>C</td><td>C</td></tr>
+          <tr><td>Group holding jurisdiction (UAE)</td><td>I</td><td>I</td><td>C</td><td>R/A</td><td>C</td><td>C</td></tr>
+          <tr><td>Travel holding jurisdiction (UAE vs NL)</td><td>I</td><td>I</td><td>C</td><td>R/A</td><td>C</td><td>C</td></tr>
+          <tr><td>Free zone comparison (DIFC vs Abu Dhabi)</td><td>I</td><td>I</td><td>C</td><td>R/A</td><td>I</td><td>I</td></tr>
+          <tr><td>Transfer mechanics analysis (4 options)</td><td>I</td><td>I</td><td>C</td><td>R/A</td><td>C</td><td>I</td></tr>
+          <tr><td>Exit tax quantification framework</td><td>I</td><td>I</td><td>C</td><td>R/A</td><td>R</td><td>I</td></tr>
+          <tr><td>Trust infeasibility documentation</td><td>I</td><td>I</td><td>R/A</td><td>C</td><td>I</td><td>I</td></tr>
+          <tr><td>Dutch participation exemption (preliminary)</td><td>I</td><td>I</td><td>I</td><td>R/A</td><td>I</td><td>C</td></tr>
+          <tr><td>IPO readiness assessment</td><td>I</td><td>C</td><td>R/A</td><td>C</td><td>C</td><td>I</td></tr>
+          <tr><td>Phase 1 report compilation</td><td>R</td><td>I</td><td>C</td><td>R</td><td>C</td><td>I</td></tr>
+          <tr><td>Phase 1 report review &amp; approval</td><td>R</td><td>A</td><td>C</td><td>C</td><td>C</td><td>I</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- TAB 3: STRUCTURE & DECISIONS -->
+<!-- ================================================================ -->
+<div id="tab-structure" class="tab-page">
+
+  <!-- ENTITY STRUCTURE: CURRENT VS TARGET -->
+  <div class="card">
+    <div class="section-title">Entity Structure — Current vs Target</div>
+    <div class="grid-2">
+      <!-- CURRENT STRUCTURE -->
+      <div>
+        <div class="label-text" style="margin-bottom:12px;">Current Structure (As-Is)</div>
+        <div class="org-chart">
+          <div class="org-node keep">
+            <div class="org-name">US Company (LLC)</div>
+            <div class="org-jurisdiction">USA (Delaware)</div>
+            <div class="org-role">UBO Personal Holding</div>
+            <div class="org-status" style="color:#888;">Active — Stays</div>
+          </div>
+          <div class="org-connector"></div>
+          <div class="org-node migrate">
+            <div class="org-name">Dyninno Group Limited (DGL)</div>
+            <div class="org-jurisdiction">Malta</div>
+            <div class="org-role">Group Holding</div>
+            <div class="org-status" style="color:#E22A26;">Target for Migration</div>
+          </div>
+          <div class="org-connector"></div>
+          <div class="org-node migrate">
+            <div class="org-name">Dynamic Innovations Ltd (DIL)</div>
+            <div class="org-jurisdiction">Malta</div>
+            <div class="org-role">Intermediate Holding</div>
+            <div class="org-status" style="color:#E22A26;">Target for Migration</div>
+          </div>
+          <div class="org-connector"></div>
+          <div class="org-row">
+            <div class="org-branch">
+              <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                <div class="org-name" style="font-size:11px;">Dyninno Mgmt (DIFC) Ltd</div>
+                <div class="org-jurisdiction">UAE (DIFC)</div>
+              </div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                <div class="org-name" style="font-size:11px;">ITN Inc / LTS Inc</div>
+                <div class="org-jurisdiction">USA (DE)</div>
+              </div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                <div class="org-name" style="font-size:11px;">OOJO International BV</div>
+                <div class="org-jurisdiction">Netherlands</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <div class="org-row">
+              <div class="org-branch">
+                <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                  <div class="org-name" style="font-size:11px;">Dynatech SIA/LTD/SEA</div>
+                  <div class="org-jurisdiction">LV / MT / SG</div>
+                </div>
+              </div>
+              <div class="org-branch">
+                <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                  <div class="org-name" style="font-size:11px;">Travel Management Group (TMG)</div>
+                  <div class="org-jurisdiction">USA</div>
+                </div>
+              </div>
+              <div class="org-branch">
+                <div class="org-node keep" style="font-size:11px; padding:8px 10px;">
+                  <div class="org-name" style="font-size:11px;">Fintech Entities</div>
+                  <div class="org-jurisdiction">Multiple</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- TARGET STRUCTURE -->
+      <div>
+        <div class="label-text" style="margin-bottom:12px;">Target Structure (To-Be)</div>
+        <div class="org-chart">
+          <div class="org-node keep">
+            <div class="org-name">US Company (LLC)</div>
+            <div class="org-jurisdiction">USA (Delaware)</div>
+            <div class="org-role">UBO Personal Holding</div>
+            <div class="org-status" style="color:#22c55e;">DE Stays — GILTI ~2x better</div>
+          </div>
+          <div class="org-connector"></div>
+          <div class="org-node new-entity">
+            <div class="org-name">New Group Holding</div>
+            <div class="org-jurisdiction">UAE (DIFC)</div>
+            <div class="org-role">Unified Group Holding</div>
+            <div class="org-status" style="color:#22c55e;">New Entity</div>
+          </div>
+          <div class="org-connector"></div>
+          <div class="org-row">
+            <div class="org-branch">
+              <div class="org-node question" style="padding:8px 12px;">
+                <div class="org-name" style="font-size:11px;">Travel Holding</div>
+                <div class="org-jurisdiction">UAE or NL?</div>
+                <div class="org-status" style="color:#f59e0b;">Decision Pending</div>
+              </div>
+              <div class="org-connector"></div>
+              <div class="org-row" style="gap:8px;">
+                <div class="org-node keep" style="font-size:10px; padding:6px 8px; min-width:75px;">
+                  <div class="org-name" style="font-size:10px;">DIFC Ltd</div>
+                </div>
+                <div class="org-node keep" style="font-size:10px; padding:6px 8px; min-width:75px;">
+                  <div class="org-name" style="font-size:10px;">ITN/LTS</div>
+                </div>
+                <div class="org-node keep" style="font-size:10px; padding:6px 8px; min-width:75px;">
+                  <div class="org-name" style="font-size:10px;">OOJO BV</div>
+                </div>
+              </div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node new-entity" style="padding:8px 12px;">
+                <div class="org-name" style="font-size:11px;">Fintech Holding</div>
+                <div class="org-jurisdiction">UAE</div>
+                <div class="org-status" style="color:#22c55e;">New — Separated</div>
+              </div>
+              <div class="org-connector"></div>
+              <div class="org-node keep" style="font-size:10px; padding:6px 8px; min-width:75px;">
+                <div class="org-name" style="font-size:10px;">Fintech Entities</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <div class="org-node liquidate" style="padding:8px 12px;">
+              <div class="org-name" style="font-size:11px;">DGL + DIL (Malta)</div>
+              <div class="org-status" style="color:#E22A26;">Liquidated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECISION LOG -->
+  <div class="card">
+    <div class="section-title">Decision Log</div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterDecisions('ALL')">All</button>
+      <button class="filter-btn" onclick="filterDecisions('MoM#01')">MoM#01</button>
+      <button class="filter-btn" onclick="filterDecisions('MoM#02')">MoM#02</button>
+      <button class="filter-btn" onclick="filterDecisions('MoM#03')">MoM#03</button>
+      <button class="filter-btn" onclick="filterDecisions('MoM#04')">MoM#04</button>
+    </div>
+    <table class="tbl" id="decision-table">
+      <thead><tr><th>#</th><th>Decision</th><th>Source</th><th>Track</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr data-source="MoM#01"><td>1</td><td>Malta holding (DGL/DIL) must be migrated — not salvageable</td><td>MoM#01</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#01"><td>2</td><td>UAE (Dubai) is the default for group holding</td><td>MoM#01</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#01"><td>3</td><td>Travel holding: analyze UAE vs Netherlands</td><td>MoM#01</td><td>Jurisdiction</td><td><span class="badge badge-blue">In Analysis</span></td></tr>
+        <tr data-source="MoM#01"><td>4</td><td>Trust structure not viable for fintech</td><td>MoM#01</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#01"><td>5</td><td>Travel and fintech risks separated at holding level</td><td>MoM#01</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#01"><td>6</td><td>Three-phase approach adopted</td><td>MoM#01</td><td>Governance</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#01"><td>7</td><td>Check DIFC vs Abu Dhabi free zone for holding tax differential</td><td>MoM#01</td><td>Jurisdiction</td><td><span class="badge badge-green">Resolved</span></td></tr>
+        <tr data-source="MoM#01"><td>8</td><td>Program Manager assigned to drive process</td><td>MoM#01</td><td>Governance</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#02"><td>9</td><td>Legal defines options first, then Tax analyzes</td><td>MoM#02</td><td>Process</td><td><span class="badge badge-amber">Overridden</span></td></tr>
+        <tr data-source="MoM#03"><td>10</td><td>Legal Counsel + Senior Legal Counsel assigned</td><td>MoM#03</td><td>Governance</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#03"><td>11</td><td>Trust DROPPED — CLO confirmed elimination</td><td>MoM#03</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#03"><td>12</td><td>Legal to document all transfer options</td><td>MoM#03</td><td>Process</td><td><span class="badge badge-gray">To Do</span></td></tr>
+        <tr data-source="MoM#04"><td>13</td><td>Trust DROPPED — 4th confirmation (permanent)</td><td>MoM#04</td><td>Structure</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr data-source="MoM#04"><td>14</td><td>Holding group CONFIRMED as default and only approach</td><td>MoM#04</td><td>Structure</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#04"><td>15</td><td>Delaware STAYS in ownership chain — GILTI ~2x better at corporate level</td><td>MoM#04</td><td>Tax</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#04"><td>16</td><td>Tax-first approach adopted; Legal works in parallel</td><td>MoM#04</td><td>Process</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+        <tr data-source="MoM#04"><td>17</td><td>NL vs UAE DEFERRED — depends on UBO IPO decision</td><td>MoM#04</td><td>Jurisdiction</td><td><span class="badge badge-amber">Deferred</span></td></tr>
+        <tr data-source="MoM#04"><td>18</td><td>Steering Committee = CLO + CFO + UBO; PM prepares, SteerCo decides</td><td>MoM#04</td><td>Governance</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DECISION TREES -->
+  <div class="card">
+    <div class="section-title">Decision Trees</div>
+    <div class="grid-2">
+      <!-- Group Holding Tree -->
+      <div>
+        <div class="label-text" style="margin-bottom:8px;">Group Holding Location</div>
+        <div class="dtree-node decision" onclick="toggleDtree(this)">Where should the group holding be domiciled? <span class="dtree-toggle">&#9654;</span></div>
+        <div class="dtree-children">
+          <div class="dtree-node option">UAE (DIFC) — Default choice, confirmed at kickoff (Decision #2) and reconfirmed MoM#04 (Decision #14)</div>
+          <div class="dtree-node deferred" onclick="toggleDtree(this)">Netherlands — Only if IPO readiness is a criterion <span class="dtree-toggle">&#9654;</span></div>
+          <div class="dtree-children">
+            <div class="dtree-node blocked">Blocked: UBO IPO decision not obtained (DEP-2)</div>
+            <div class="dtree-node deferred">Deferred: Decision #17 — NL vs UAE awaiting UBO</div>
+            <div class="dtree-node blocked">Finding F3: DIFC 9% may fail Dutch 10% subject-to-tax test</div>
+          </div>
+          <div class="dtree-node blocked">Malta — Must migrate. No substance, not salvageable (Decision #1)</div>
+        </div>
+      </div>
+      <!-- DIL Migration Tree -->
+      <div>
+        <div class="label-text" style="margin-bottom:8px;">DIL Migration Mechanism</div>
+        <div class="dtree-node decision" onclick="toggleDtree(this)">How to move DIL from Malta? <span class="dtree-toggle">&#9654;</span></div>
+        <div class="dtree-children">
+          <div class="dtree-node option">Option 1: Investment in kind — DE contributes DIL into new UAE entity, then liquidate or merge DIL</div>
+          <div class="dtree-node option">Option 2: Share sale (DE level) — DE sells DIL shares to new UAE entity, then liquidate DIL</div>
+          <div class="dtree-node deferred">Option 3: Subsidiary sale (DIL level) — DIL sells subs to new UAE entity (must clear all balances first)</div>
+          <div class="dtree-node deferred">Option 4: Redomiciliation — Legal relocation Malta to UAE (pending Legal feasibility check)</div>
+          <div class="dtree-node blocked" style="opacity:0.5;">Asset sale — REMOVED per MoM#04 (all transfers share-based)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIL MIGRATION OPTIONS TABLE -->
+  <div class="card">
+    <div class="section-title">DIL Migration Options Comparison</div>
+    <div class="body-text" style="margin-bottom:12px;">First step (all options): Delaware entity creates a new company in UAE.</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Option</th><th>Mechanism</th><th>Then What</th><th>Exit Tax</th><th>Complexity</th><th>Key Risk</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Investment in kind</td><td>DE contributes DIL (+ subs) into new UAE entity</td><td>Liquidate or merge DIL</td><td>Full triggered</td><td>Moderate</td><td>Liquidation vs merger: EU treats as separate transactions</td><td><span class="badge badge-blue">Analyzing</span></td></tr>
+        <tr><td>2</td><td>Share sale (DE)</td><td>DE sells DIL shares to new UAE entity</td><td>Liquidate DIL</td><td>Full triggered</td><td>Moderate</td><td>Standard mechanics, well-understood</td><td><span class="badge badge-blue">Analyzing</span></td></tr>
+        <tr><td>3</td><td>Subsidiary sale (DIL)</td><td>DIL sells subsidiaries to new entity</td><td>Liquidate DIL (clear balances first)</td><td>Full triggered</td><td>High</td><td>DIL intercompany balances — magnitude unknown</td><td><span class="badge badge-blue">Analyzing</span></td></tr>
+        <tr><td>4</td><td>Redomiciliation</td><td>Legal relocation Malta to UAE</td><td>No intermediate entity needed</td><td>Potential deferral</td><td>High (legal)</td><td>EU to non-EU: likely not feasible per CLO</td><td><span class="badge badge-amber">Pending Legal</span></td></tr>
+        <tr style="opacity:0.4;"><td>&mdash;</td><td>Asset sale</td><td>REMOVED per MoM#04</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-gray">Removed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PENDING DECISIONS REGISTER -->
+  <div class="card">
+    <div class="section-title">Pending Decisions Register</div>
+    <table class="tbl">
+      <thead><tr><th>Decision</th><th>Decision Maker</th><th>Depends On</th><th>Target</th><th>Impact if Delayed</th></tr></thead>
+      <tbody>
+        <tr><td>IPO readiness: is this a criterion for travel holding?</td><td>UBO/Owner</td><td>UBO strategic assessment</td><td>Apr 2026</td><td>Cannot resolve NL vs UAE — blocks Phase 2</td></tr>
+        <tr><td>Travel holding jurisdiction: UAE or Netherlands?</td><td>UBO/Owner</td><td>Tax analysis + Finding F3 resolution</td><td>Apr 2026</td><td>Blocks entire Phase 2</td></tr>
+        <tr><td>Free zone selection: DIFC or other?</td><td>UBO + Tax Dir</td><td>Finding F4 (resolved: DIFC)</td><td>Apr 2026</td><td>Entity formation delayed</td></tr>
+        <tr><td>Transfer mechanic preference</td><td>UBO/Owner</td><td>Exit tax quantum (Finding F1)</td><td>Phase Gate 1</td><td>Cannot start execution planning</td></tr>
+        <tr><td>Transfer sequence</td><td>CLO</td><td>Jurisdiction + mechanic decisions</td><td>Phase Gate 1</td><td>Wrong sequence = higher tax, forecloses options</td></tr>
+        <tr><td>New UAE entity vs use existing DIFC</td><td>SteerCo</td><td>Substance analysis</td><td>Phase 2</td><td>Substance risk if separate entity under-staffed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- TAB 4: TAX & JURISDICTIONS -->
+<!-- ================================================================ -->
+<div id="tab-tax" class="tab-page">
+
+  <!-- UAE vs NL HEAD-TO-HEAD -->
+  <div class="card">
+    <div class="section-title">Travel Holding — UAE vs Netherlands Head-to-Head</div>
+    <table class="tbl">
+      <thead><tr><th>Criterion</th><th>UAE (DIFC)</th><th>Netherlands</th></tr></thead>
+      <tbody>
+        <tr><td>Corporate tax rate</td><td class="cell-adv">9% (DIFC CT)</td><td class="cell-neutral">25.8% (headline); mitigated by participation exemption</td></tr>
+        <tr><td>Dividends from Latvia</td><td class="cell-adv">No withholding tax</td><td class="cell-adv">Works — treaty network</td></tr>
+        <tr><td>Dividends from UK</td><td class="cell-adv">No withholding tax</td><td class="cell-adv">Works — treaty network</td></tr>
+        <tr><td>Intercompany (profitable subs)</td><td class="cell-disadv">No treaty network — expensive if undistributed earnings accumulate</td><td class="cell-adv">EU treaty network — comprehensive protection</td></tr>
+        <tr><td>Participation exemption</td><td class="cell-adv">Federal exemption on qualifying dividends &amp; capital gains</td><td class="cell-neutral">Available but 9% DIFC may fail 10% subject-to-tax test</td></tr>
+        <tr><td>IPO readiness</td><td class="cell-disadv">No track record for public market access</td><td class="cell-adv">Proven jurisdiction — Amsterdam/Euronext</td></tr>
+        <tr><td>Substance requirement</td><td class="cell-adv">Lower — existing presence leveraged</td><td class="cell-disadv">Higher — plus substance needed above Dutch holding</td></tr>
+        <tr><td>KPMG finding</td><td class="cell-neutral">N/A</td><td class="cell-adv">If holding created correctly, dividend tax exemption proportional to investment</td></tr>
+        <tr><td>Setup complexity</td><td class="cell-adv">Lower</td><td class="cell-disadv">Higher</td></tr>
+        <tr><td>Ongoing cost</td><td class="cell-adv">Lower</td><td class="cell-disadv">Higher</td></tr>
+        <tr><td>Reversibility</td><td class="cell-adv">UAE to NL later: feasible but costly</td><td class="cell-disadv">NL to UAE later: extremely difficult and tax-costly</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3-WAY JURISDICTION COMPARISON -->
+  <div class="card">
+    <div class="section-title">3-Way Jurisdiction Comparison — Holding Activities</div>
+    <table class="tbl">
+      <thead><tr><th>Factor</th><th>UAE (DIFC)</th><th>Netherlands</th><th>Malta (Current)</th></tr></thead>
+      <tbody>
+        <tr><td>Headline CT rate</td><td>9%</td><td>25.8%</td><td>35% (effective 5% with refund)</td></tr>
+        <tr><td>Participation exemption</td><td class="cell-adv">Yes (federal)</td><td class="cell-adv">Yes (conditions apply)</td><td class="cell-adv">Yes (conditions apply)</td></tr>
+        <tr><td>Treaty network</td><td class="cell-disadv">Limited (~100 treaties)</td><td class="cell-adv">Extensive (~100 treaties)</td><td class="cell-adv">Extensive (~80 treaties)</td></tr>
+        <tr><td>Substance</td><td class="cell-adv">Existing (3+ years)</td><td class="cell-disadv">Must build from scratch</td><td class="cell-disadv">None — artificial structure</td></tr>
+        <tr><td>EU access</td><td class="cell-disadv">No EU membership</td><td class="cell-adv">Full EU member</td><td class="cell-adv">Full EU member</td></tr>
+        <tr><td>IPO viability</td><td class="cell-disadv">Limited</td><td class="cell-adv">Strong (Euronext)</td><td class="cell-neutral">Possible but limited</td></tr>
+        <tr><td>Regulatory risk</td><td class="cell-adv">Low for holding</td><td class="cell-neutral">Moderate — compliance</td><td class="cell-disadv">High — no substance, audit risk</td></tr>
+        <tr><td>Program recommendation</td><td class="cell-adv">Default for group holding</td><td class="cell-neutral">Contingent on IPO criterion</td><td class="cell-disadv">Exit — not salvageable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TRANSFER MECHANICS SCORING -->
+  <div class="card">
+    <div class="section-title">Transfer Mechanics — Comparative Scoring</div>
+    <div style="position:relative; height:260px;">
+      <canvas id="transferCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- CRITICAL FINDINGS (TAX) -->
+  <div class="card">
+    <div class="section-title">Critical Findings — Tax &amp; Jurisdiction</div>
+    <div class="grid-2">
+      <div class="finding-card">
+        <div class="finding-title">Malta Exit Tax 35% vs 5%</div>
+        <div class="finding-desc">Whether the 6/7ths shareholder refund mechanism applies to exit taxation determines whether exit tax is ~5% (manageable) or 35% (potentially program-altering). Malta tax counsel must confirm before any transfer mechanic cost comparison.</div>
+        <span class="badge badge-red">URGENT</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">US CFC/GILTI Exposure</div>
+        <div class="finding-desc">US LLC holding UAE entity triggers CFC rules. Subpart F, GILTI, and Section 1248 recharacterization must be analyzed. Delaware stays because GILTI at corporate level is ~2x more favorable than at UBO personal level.</div>
+        <span class="badge badge-red">URGENT</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">DIFC 9% vs Dutch 10% Test</div>
+        <div class="finding-desc">Dutch participation exemption requires at least 10% subject-to-tax. DIFC at 9% may fail this threshold, fundamentally undermining the Netherlands option for travel holding. Dutch counsel must verify.</div>
+        <span class="badge badge-amber">HIGH</span>
+      </div>
+      <div class="finding-card resolved">
+        <div class="finding-title">Free Zone Misconception Resolved</div>
+        <div class="finding-desc">DIFC and ADGM both operate under the same federal CT Law. Dividends and capital gains are exempt at federal level through participation exemption regardless of free zone selection. DIFC is the presumptive choice.</div>
+        <span class="badge badge-green">RESOLVED</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">Pillar Two Risk (EUR 750M)</div>
+        <div class="finding-desc">If consolidated group revenue exceeds EUR 750M, Pillar Two global minimum tax at 15% could eliminate any free zone benefit. CFO must confirm the revenue threshold position.</div>
+        <span class="badge badge-amber">HIGH</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">Sequence: NL First if Selected</div>
+        <div class="finding-desc">If Netherlands selected for travel, optimal sequence: move travel first (Malta to NL under EU Merger Directive with exit tax deferral potential), then group holding (Malta to UAE). Reverse forecloses EU option.</div>
+        <span class="badge badge-amber">HIGH</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVISOR ENGAGEMENT PIPELINE -->
+  <div class="card">
+    <div class="section-title">Advisor Engagement Pipeline</div>
+    <table class="tbl">
+      <thead><tr><th>Advisor</th><th>Jurisdiction</th><th>Scope</th><th>Pipeline Status</th><th>Days</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>KPMG Meijburg &amp; Co</td><td>Netherlands</td><td>Transfer pricing — holding layer impact</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage2" style="width:50%;"></div>
+              </div>
+              <span class="badge badge-amber">Engaged</span>
+            </div>
+          </td>
+          <td>15d engaged</td><td><span class="badge badge-amber">HIGH</span></td>
+        </tr>
+        <tr>
+          <td>Malta Tax Counsel</td><td>Malta</td><td>Exit tax, 6/7ths refund, liquidation</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage1" style="width:25%;"></div>
+              </div>
+              <span class="badge badge-gray">Not Engaged</span>
+            </div>
+          </td>
+          <td>0d</td><td><span class="badge badge-red">URGENT</span></td>
+        </tr>
+        <tr>
+          <td>US Tax Counsel</td><td>USA</td><td>CFC/GILTI, Subpart F, Section 1248</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage1" style="width:0%;"></div>
+              </div>
+              <span class="badge badge-red">NOT SCOPED</span>
+            </div>
+          </td>
+          <td>0d</td><td><span class="badge badge-red">URGENT</span></td>
+        </tr>
+        <tr>
+          <td>UAE Tax Counsel</td><td>UAE</td><td>Participation exemption, QFZP, substance</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage1" style="width:25%;"></div>
+              </div>
+              <span class="badge badge-gray">Not Engaged</span>
+            </div>
+          </td>
+          <td>0d</td><td><span class="badge badge-red">HIGH</span></td>
+        </tr>
+        <tr>
+          <td>Dutch Tax Counsel</td><td>Netherlands</td><td>Participation exemption 10% test, substance</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage1" style="width:25%;"></div>
+              </div>
+              <span class="badge badge-gray">Not Engaged</span>
+            </div>
+          </td>
+          <td>0d</td><td><span class="badge badge-amber">HIGH</span></td>
+        </tr>
+        <tr>
+          <td>Dentons</td><td>Multi</td><td>Historical only — prior Malta holding analysis</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="pipeline-bar" style="width:120px;">
+                <div class="pipeline-fill stage1" style="width:0%;"></div>
+              </div>
+              <span class="badge badge-gray">Archive Only</span>
+            </div>
+          </td>
+          <td>&mdash;</td><td><span class="badge badge-gray">LOW</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- TAB 5: RISK & DEPENDENCIES -->
+<!-- ================================================================ -->
+<div id="tab-risk" class="tab-page">
+
+  <!-- RISK HEAT MAP -->
+  <div class="card">
+    <div class="section-title">Risk Heat Map (Likelihood x Impact)</div>
+    <div class="heatmap">
+      <!-- Header row -->
+      <div class="heatmap-label"></div>
+      <div class="heatmap-label">1-Rare</div>
+      <div class="heatmap-label">2-Unlikely</div>
+      <div class="heatmap-label">3-Possible</div>
+      <div class="heatmap-label">4-Likely</div>
+      <div class="heatmap-label">5-Certain</div>
+      <!-- Row 5: Critical impact -->
+      <div class="heatmap-label">5-Crit</div>
+      <div class="heatmap-cell med">5</div>
+      <div class="heatmap-cell high">10</div>
+      <div class="heatmap-cell extreme">15<span class="hm-tooltip">R1: Exit tax 35% (no refund)</span></div>
+      <div class="heatmap-cell extreme">20<span class="hm-tooltip">R2: IPO lock-in (NL irreversible)</span></div>
+      <div class="heatmap-cell extreme">25</div>
+      <!-- Row 4: Major impact -->
+      <div class="heatmap-label">4-Major</div>
+      <div class="heatmap-cell low">4</div>
+      <div class="heatmap-cell med">8</div>
+      <div class="heatmap-cell high">12<span class="hm-tooltip">R3: CFC/GILTI unscoped</span></div>
+      <div class="heatmap-cell extreme">16<span class="hm-tooltip">R4: CLO disengaged</span></div>
+      <div class="heatmap-cell extreme">20</div>
+      <!-- Row 3: Moderate impact -->
+      <div class="heatmap-label">3-Mod</div>
+      <div class="heatmap-cell low">3</div>
+      <div class="heatmap-cell med">6</div>
+      <div class="heatmap-cell med">9<span class="hm-tooltip">R5: Dutch 10% test failure</span></div>
+      <div class="heatmap-cell high">12<span class="hm-tooltip">R6: Substance gap at new holding</span></div>
+      <div class="heatmap-cell high">15</div>
+      <!-- Row 2: Minor impact -->
+      <div class="heatmap-label">2-Minor</div>
+      <div class="heatmap-cell low">2</div>
+      <div class="heatmap-cell low">4</div>
+      <div class="heatmap-cell med">6<span class="hm-tooltip">R7: Malta filing penalties</span></div>
+      <div class="heatmap-cell med">8<span class="hm-tooltip">R8: Pillar Two threshold</span></div>
+      <div class="heatmap-cell high">10</div>
+      <!-- Row 1: Negligible impact -->
+      <div class="heatmap-label">1-Neg</div>
+      <div class="heatmap-cell low">1</div>
+      <div class="heatmap-cell low">2</div>
+      <div class="heatmap-cell low">3</div>
+      <div class="heatmap-cell med">4</div>
+      <div class="heatmap-cell med">5</div>
+    </div>
+  </div>
+
+  <!-- RISK REGISTER -->
+  <div class="card">
+    <div class="section-title">Risk Register (Sorted by Score)</div>
+    <table class="tbl">
+      <thead><tr><th>ID</th><th>Risk</th><th>Category</th><th>L</th><th>I</th><th>Score</th><th>Mitigation</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>R2</td><td>IPO jurisdiction lock-in — NL to UAE later is extremely costly</td><td>Strategic</td><td>4</td><td>5</td><td><span class="badge badge-red">20</span></td><td>Explicit UBO decision on IPO criterion before selecting NL</td><td>UBO</td></tr>
+        <tr><td>R4</td><td>Legal/Strategic Advisor disengaged (~3 min in 2 weeks)</td><td>Resource</td><td>4</td><td>4</td><td><span class="badge badge-red">16</span></td><td>CFO escalation to Sponsor; Tax-first approach adopted</td><td>CFO</td></tr>
+        <tr><td>R1</td><td>Malta exit tax at 35% (6/7ths refund does not apply)</td><td>Tax</td><td>3</td><td>5</td><td><span class="badge badge-red">15</span></td><td>Malta counsel confirmation; explore deferral under ATAD</td><td>Tax Dir</td></tr>
+        <tr><td>R3</td><td>US CFC/GILTI exposure unscoped — no US counsel engaged</td><td>Tax</td><td>3</td><td>4</td><td><span class="badge badge-red">12</span></td><td>Engage US tax counsel immediately</td><td>PM + Tax Dir</td></tr>
+        <tr><td>R6</td><td>Substance gap at new UAE holding — DIFC barely meets now</td><td>Operational</td><td>4</td><td>3</td><td><span class="badge badge-amber">12</span></td><td>Substance plan required before entity formation</td><td>CFO</td></tr>
+        <tr><td>R9</td><td>Operational restructuring layer disruption</td><td>Operational</td><td>2</td><td>4</td><td><span class="badge badge-amber">8</span></td><td>KPMG confirms no TP framework disruption; CFO validates</td><td>CFO + KPMG</td></tr>
+        <tr><td>R5</td><td>Dutch 10% subject-to-tax test failure (DIFC 9%)</td><td>Tax</td><td>3</td><td>3</td><td><span class="badge badge-amber">9</span></td><td>Dutch counsel verification; may eliminate NL option entirely</td><td>Tax Dir</td></tr>
+        <tr><td>R8</td><td>Pillar Two top-up tax if revenue exceeds EUR 750M</td><td>Tax</td><td>4</td><td>2</td><td><span class="badge badge-amber">8</span></td><td>CFO to confirm revenue threshold</td><td>CFO</td></tr>
+        <tr><td>R7</td><td>Malta filing penalties during wind-down period</td><td>Compliance</td><td>3</td><td>2</td><td><span class="badge badge-amber">6</span></td><td>Maintain Malta compliance until liquidation complete</td><td>CFO</td></tr>
+        <tr><td>R10</td><td>Regulatory notification triggers across fintech licensing</td><td>Regulatory</td><td>2</td><td>3</td><td><span class="badge badge-amber">6</span></td><td>Map all notification requirements per jurisdiction</td><td>CLO</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BLOCKER IMPACT CHAINS -->
+  <div class="card">
+    <div class="section-title">Blocker Impact Chains</div>
+
+    <div class="label-text" style="margin-bottom:6px;">Chain 1: Legal Availability Blocker</div>
+    <div class="chain">
+      <div class="chain-node red-node">CLO Disengaged</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">Transfer Options Unverified</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">Redomiciliation Feasibility Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node blue-node">Phase Gate 1 at Risk</div>
+    </div>
+
+    <div class="label-text" style="margin-bottom:6px;">Chain 2: UBO IPO Decision Blocker</div>
+    <div class="chain">
+      <div class="chain-node red-node">UBO IPO Decision Missing</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">NL vs UAE Unresolved</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">Transfer Sequence Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node blue-node">Phase 2 Cannot Start</div>
+    </div>
+
+    <div class="label-text" style="margin-bottom:6px;">Chain 3: Exit Tax Blocker</div>
+    <div class="chain">
+      <div class="chain-node red-node">Malta Exit Tax Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">Transfer Mechanic Costs Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">No Preferred Option</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node blue-node">Execution Planning Blocked</div>
+    </div>
+
+    <div class="label-text" style="margin-bottom:6px;">Chain 4: US Counsel Blocker</div>
+    <div class="chain">
+      <div class="chain-node red-node">US Counsel Not Scoped</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">CFC/GILTI Exposure Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node amber-node">Net Cost of UAE Unknown</div>
+      <div class="chain-arrow">&#8594;</div>
+      <div class="chain-node blue-node">UAE Group Holding Incomplete</div>
+    </div>
+  </div>
+
+  <!-- DEPENDENCY REGISTER -->
+  <div class="card">
+    <div class="section-title">Dependency Register</div>
+    <table class="tbl">
+      <thead><tr><th>ID</th><th>Dependency</th><th>From</th><th>To</th><th>Status</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>DEP-1</td><td>Legal/Strategic Advisor engagement</td><td>CLO availability</td><td>Transfer options verification, redomiciliation</td><td><span class="badge badge-red">Blocked</span></td><td>CFO (escalate)</td></tr>
+        <tr><td>DEP-2</td><td>UBO IPO decision</td><td>UBO strategic assessment</td><td>DGL jurisdiction (NL vs UAE)</td><td><span class="badge badge-red">Blocked</span></td><td>PM (facilitate)</td></tr>
+        <tr><td>DEP-3</td><td>UAE substance capacity</td><td>Current DIFC staffing</td><td>New holding entity viability</td><td><span class="badge badge-amber">At Risk</span></td><td>CFO + Tax Dir</td></tr>
+        <tr><td>DEP-4</td><td>DIL intercompany balance cleanup</td><td>CFO balance review</td><td>DIL liquidation (Options 1-3)</td><td><span class="badge badge-amber">Unknown</span></td><td>CFO</td></tr>
+        <tr><td>DEP-5</td><td>Redomiciliation legal feasibility</td><td>Legal team assessment</td><td>Option 4 viability</td><td><span class="badge badge-amber">Pending</span></td><td>Legal</td></tr>
+        <tr><td>DEP-6</td><td>Malta exit tax formal opinion</td><td>Malta counsel engagement</td><td>All transfer mechanic cost comparisons</td><td><span class="badge badge-red">Blocked</span></td><td>Tax Dir</td></tr>
+        <tr><td>DEP-7</td><td>US CFC/GILTI analysis</td><td>US counsel engagement</td><td>Net cost-benefit of UAE structure</td><td><span class="badge badge-red">Blocked</span></td><td>PM + Tax Dir</td></tr>
+        <tr><td>DEP-8</td><td>KPMG TP framework impact confirmation</td><td>KPMG scope extension</td><td>Holding restructuring does not disrupt ops layer</td><td><span class="badge badge-amber">Pending</span></td><td>PM</td></tr>
+        <tr><td>DEP-9</td><td>CFO consolidated revenue vs EUR 750M</td><td>Financial data</td><td>Pillar Two impact assessment</td><td><span class="badge badge-amber">Pending</span></td><td>CFO</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- STAKEHOLDER POWER/INTEREST MAP -->
+  <div class="card">
+    <div class="section-title">Stakeholder Power / Interest Map</div>
+    <div class="stakeholder-grid">
+      <div class="sq-label"></div>
+      <div class="sq-label">Low Interest</div>
+      <div class="sq-label">High Interest</div>
+      <div class="sq-label rotated">High Power</div>
+      <div class="sq-cell">
+        <div class="label-text" style="margin-bottom:6px;">Keep Satisfied</div>
+        <div class="sq-person">KPMG (External TP Advisor)</div>
+      </div>
+      <div class="sq-cell" style="background:rgba(226,42,38,0.08);">
+        <div class="label-text" style="margin-bottom:6px;">Manage Closely</div>
+        <div class="sq-person" style="font-weight:700;">UBO/Owner</div>
+        <div class="sq-person" style="font-weight:700;">Legal/Strategic Advisor</div>
+        <div class="sq-person">CFO</div>
+      </div>
+      <div class="sq-label rotated">Low Power</div>
+      <div class="sq-cell">
+        <div class="label-text" style="margin-bottom:6px;">Monitor</div>
+        <div class="sq-person">Dentons (archive only)</div>
+        <div class="sq-person">Call Center Entities</div>
+      </div>
+      <div class="sq-cell">
+        <div class="label-text" style="margin-bottom:6px;">Keep Informed</div>
+        <div class="sq-person">Tax Director</div>
+        <div class="sq-person">Program Manager</div>
+        <div class="sq-person">Legal Team Members</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DORMANT COMPANY TRACKER -->
+  <div class="card">
+    <div class="section-title">Dormant Company Tracker</div>
+    <table class="tbl">
+      <thead><tr><th>Country</th><th>Status</th><th>Blocker</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>Vietnam</td><td><span class="badge badge-amber">Balances Cleaned</span></td><td>Must pay rent until liquidation starts</td><td>CFO</td></tr>
+        <tr><td>Brazil</td><td><span class="badge badge-amber">Balances Cleaned</span></td><td>Awaiting court settlement (employee)</td><td>CFO</td></tr>
+        <tr><td>Turkey</td><td><span class="badge badge-gray">Pending</span></td><td>None identified</td><td>CFO + PM</td></tr>
+        <tr><td>Italy</td><td><span class="badge badge-blue">Winding Down</span></td><td>Employee transferring to Amsterdam via NL entity</td><td>CFO</td></tr>
+        <tr><td>Romania</td><td><span class="badge badge-blue">In Progress</span></td><td>Legal engaged</td><td>Legal</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- END TAB PAGES -->
+<!-- ================================================================ -->
+
+  </div><!-- page-content -->
+</div><!-- main -->
+
+<!-- ================================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ================================================================ -->
+<script>
+/* ===== TAB SWITCHING ===== */
+function switchTab(tabId) {
+  var pages = document.querySelectorAll('.tab-page');
+  var navLinks = document.querySelectorAll('.sidebar-nav a');
+  var i;
+  for (i = 0; i < pages.length; i++) {
+    pages[i].classList.remove('active');
+    pages[i].style.opacity = '0';
+  }
+  for (i = 0; i < navLinks.length; i++) {
+    navLinks[i].classList.remove('active');
+  }
+  var targetPage = document.getElementById('tab-' + tabId);
+  if (targetPage) {
+    targetPage.classList.add('active');
+    setTimeout(function() { targetPage.style.opacity = '1'; }, 20);
+  }
+  var tabMap = { 'exec': 0, 'status': 1, 'structure': 2, 'tax': 3, 'risk': 4 };
+  var idx = tabMap[tabId];
+  if (typeof idx !== 'undefined' && navLinks[idx]) {
+    navLinks[idx].classList.add('active');
+  }
+}
+
+/* ===== COLLAPSIBLE SECTIONS ===== */
+function toggleCollapsible(header) {
+  var body = header.nextElementSibling;
+  var icon = header.querySelector('.toggle-icon');
+  if (body.classList.contains('open')) {
+    body.classList.remove('open');
+    if (icon) icon.classList.remove('rotated');
+  } else {
+    body.classList.add('open');
+    if (icon) icon.classList.add('rotated');
+  }
+}
+
+/* ===== DECISION TREE EXPAND/COLLAPSE ===== */
+function toggleDtree(node) {
+  var children = node.nextElementSibling;
+  if (!children || !children.classList.contains('dtree-children')) return;
+  var toggle = node.querySelector('.dtree-toggle');
+  if (children.classList.contains('open')) {
+    children.classList.remove('open');
+    if (toggle) toggle.classList.remove('rotated');
+  } else {
+    children.classList.add('open');
+    if (toggle) toggle.classList.add('rotated');
+  }
+}
+
+/* ===== ACTION ITEM FILTER ===== */
+function filterActions(priority) {
+  var table = document.getElementById('action-table');
+  var rows = table.querySelectorAll('tbody tr');
+  var buttons = table.parentElement.querySelectorAll('.filter-btn');
+  var i;
+  for (i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active');
+    if (buttons[i].textContent.trim().toUpperCase() === priority || (priority === 'ALL' && buttons[i].textContent.trim().toUpperCase() === 'ALL')) {
+      buttons[i].classList.add('active');
+    }
+  }
+  for (i = 0; i < rows.length; i++) {
+    if (priority === 'ALL') {
+      rows[i].style.display = '';
+    } else {
+      var rowPriority = rows[i].getAttribute('data-priority');
+      rows[i].style.display = (rowPriority === priority) ? '' : 'none';
+    }
+  }
+}
+
+/* ===== DECISION LOG FILTER ===== */
+function filterDecisions(source) {
+  var table = document.getElementById('decision-table');
+  var rows = table.querySelectorAll('tbody tr');
+  var buttons = table.parentElement.querySelectorAll('.filter-btn');
+  var i;
+  for (i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active');
+    if (buttons[i].textContent.trim() === source || (source === 'ALL' && buttons[i].textContent.trim() === 'All')) {
+      buttons[i].classList.add('active');
+    }
+  }
+  for (i = 0; i < rows.length; i++) {
+    if (source === 'ALL') {
+      rows[i].style.display = '';
+    } else {
+      var rowSource = rows[i].getAttribute('data-source');
+      rows[i].style.display = (rowSource === source) ? '' : 'none';
+    }
+  }
+}
+
+/* ===== CHART INITIALIZATION ===== */
+window.onload = function() {
+
+  /* --- GANTT CHART (Phase 1 Roadmap) --- */
+  var ganttCtx = document.getElementById('ganttCanvas').getContext('2d');
+  var ganttChart = new Chart(ganttCtx, {
+    type: 'bar',
+    data: {
+      labels: [
+        'Wk 1: Kickoff & Setup',
+        'Wk 2: Tax Analysis Initiation',
+        'Wk 3: Initial Findings & Free Zone',
+        'Wk 4: Transfer Mechanics Analysis',
+        'Wk 5: Exit Tax Quantification',
+        'Wk 6: Draft Analysis Consolidation',
+        'Wk 7: Review Cycle',
+        'Wk 8: Phase Gate 1'
+      ],
+      datasets: [{
+        label: 'Duration (days)',
+        data: [4, 5, 5, 5, 5, 5, 5, 5],
+        backgroundColor: [
+          '#22c55e',
+          '#E22A26',
+          '#E22A26',
+          '#ccc',
+          '#ccc',
+          '#ccc',
+          '#ccc',
+          '#252429'
+        ],
+        borderRadius: 4,
+        barThickness: 24
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var owners = ['PM', 'Tax Dir', 'Tax Dir', 'Tax Dir', 'Tax Dir+CFO', 'Tax Dir+PM', 'PM', 'UBO'];
+              var statuses = ['Done', 'In Progress', 'Current', 'Upcoming', 'Upcoming', 'Upcoming', 'Upcoming', 'Gate'];
+              var dates = ['Mar 11-14', 'Mar 17-21', 'Mar 24-28', 'Mar 31-Apr 4', 'Apr 7-11', 'Apr 14-18', 'Apr 21-25', 'Apr 28-May 2'];
+              return dates[ctx.dataIndex] + ' | ' + owners[ctx.dataIndex] + ' | ' + statuses[ctx.dataIndex];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: false,
+          max: 6
+        },
+        y: {
+          ticks: {
+            font: { size: 11, weight: '500', family: 'Inter' },
+            color: '#252429'
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  /* --- TRANSFER MECHANICS SCORING CHART --- */
+  var transferCtx = document.getElementById('transferCanvas').getContext('2d');
+  var transferChart = new Chart(transferCtx, {
+    type: 'bar',
+    data: {
+      labels: [
+        'Opt 1: Investment in Kind',
+        'Opt 2: Share Sale (DE)',
+        'Opt 3: Subsidiary Sale (DIL)',
+        'Opt 4: Redomiciliation'
+      ],
+      datasets: [
+        {
+          label: 'Tax Efficiency',
+          data: [5, 5, 4, 7],
+          backgroundColor: '#E22A26',
+          barThickness: 14,
+          borderRadius: 3
+        },
+        {
+          label: 'Legal Simplicity',
+          data: [6, 7, 4, 3],
+          backgroundColor: '#3b82f6',
+          barThickness: 14,
+          borderRadius: 3
+        },
+        {
+          label: 'Operational Risk (higher=better)',
+          data: [7, 7, 4, 8],
+          backgroundColor: '#22c55e',
+          barThickness: 14,
+          borderRadius: 3
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 10, family: 'Inter' }, usePointStyle: true, pointStyle: 'rect' }
+        }
+      },
+      scales: {
+        x: {
+          max: 10,
+          ticks: { font: { size: 10 }, stepSize: 2 },
+          title: { display: true, text: 'Score (10 = Best)', font: { size: 10, family: 'Inter' } }
+        },
+        y: {
+          ticks: { font: { size: 11, weight: '500', family: 'Inter' }, color: '#252429' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+};
+</script>
+
+</body>
+</html>
